@@ -156,7 +156,7 @@ class ResultSet implements \Iterator, \Countable
      */
     public function count()
     {
-        return sizeof($this->_results);
+        return sizeof($this->getResults());
     }
 
     /**
@@ -167,7 +167,7 @@ class ResultSet implements \Iterator, \Countable
     public function current()
     {
         if ($this->valid()) {
-            return $this->_results[$this->key()];
+            return $this->getResults()[$this->key()];
         } else {
             return false;
         }
@@ -200,7 +200,7 @@ class ResultSet implements \Iterator, \Countable
      */
     public function valid()
     {
-        return isset($this->_results[$this->key()]);
+        return isset($this->getResults()[$this->key()]);
     }
 
     /**
