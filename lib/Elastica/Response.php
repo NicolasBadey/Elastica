@@ -182,6 +182,17 @@ class Elastica_Response
     }
 
     /**
+     * Return Elasticsearch string response
+     *
+     * @return string
+     */
+    public function getResponseString()
+    {
+
+        return $this->_responseString;
+    }
+
+    /**
      * Time request took
      *
      * @return int Time request took

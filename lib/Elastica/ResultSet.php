@@ -40,26 +40,9 @@ class Elastica_ResultSet implements Iterator, Countable
     public function __construct(Elastica_Response $response)
     {
         $this->rewind();
-        $this->_init($response);
+        $this->_response = $response;
     }
 
-    /**
-     * Loads all data into the results object (initalisation)
-     *
-     * @param Elastica_Response $response Response object
-     */
-    protected function _init(Elastica_Response $response)
-    {
-        $this->_response = $response;
-        $result = $response->getData();
-        $this->_totalHits = $result['hits']['total'];
-        $this->_took = isset($result['took']) ? $result['took'] : 0;
-        if (isset($result['hits']['hits'])) {
-            foreach ($result['hits']['hits'] as $hit) {
-                $this->_results[] = new Elastica_Result($hit);
-            }
-        }
-    }
 
     /**
      * Returns all results
@@ -68,6 +51,14 @@ class Elastica_ResultSet implements Iterator, Countable
      */
     public function getResults()
     {
+        if (empty($this->_results)){
+            $result = $this->_response->getData();
+            if (isset($result['hits']['hits'])) {
+                foreach ($result['hits']['hits'] as $hit) {
+                    $this->_results[] = new Result($hit);
+                }
+            }
+        }
         return $this->_results;
     }
 
@@ -102,18 +93,23 @@ class Elastica_ResultSet implements Iterator, Countable
      */
     public function getTotalHits()
     {
-        return (int) $this->_totalHits;
+        $result = $this->getResults();
+
+        return isset($result['hits']['total']) ? (int) $result['hits']['total'] : 0;
     }
 
     /**
-    * Returns the total number of ms for this search to complete
-    *
-    * @return int Total time
-    */
+     * Returns the total number of ms for this search to complete
+     *
+     * @return int Total time
+     */
     public function getTotalTime()
     {
-        return (int) $this->_took;
+        $result = $this->getResults();
+
+        return isset($result['took']) ? (int) $result['took'] : 0;
     }
+
 
     /**
      * Returns response object
@@ -132,18 +128,18 @@ class Elastica_ResultSet implements Iterator, Countable
      */
     public function count()
     {
-        return sizeof($this->_results);
+        return sizeof($this->getResults());
     }
 
     /**
      * Returns the current object of the set
      *
-     * @return Elastica_Result|bool Set object or false if not valid (no more entries)
+     * @return \Elastica\Result|bool Set object or false if not valid (no more entries)
      */
     public function current()
     {
         if ($this->valid()) {
-            return $this->_results[$this->key()];
+            return $this->getResults()[$this->key()];
         } else {
             return false;
         }
@@ -176,7 +172,7 @@ class Elastica_ResultSet implements Iterator, Countable
      */
     public function valid()
     {
-        return isset($this->_results[$this->key()]);
+        return isset($this->getResults()[$this->key()]);
     }
 
     /**
