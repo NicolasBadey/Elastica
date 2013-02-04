@@ -120,6 +120,19 @@ class Response
     }
 
     /**
+     * Return Elasticsearch string response
+     *
+     * @return string
+     */
+    public function getResponseString()
+    {
+
+        return $this->_responseString;
+    }
+
+
+
+    /**
      * Response data array
      *
      * @return array Response data array

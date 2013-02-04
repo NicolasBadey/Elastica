@@ -61,26 +61,8 @@ class ResultSet implements \Iterator, \Countable
     public function __construct(Response $response, Query $query)
     {
         $this->rewind();
-        $this->_init($response);
-        $this->_query = $query;
-    }
-
-    /**
-     * Loads all data into the results object (initialisation)
-     *
-     * @param \Elastica\Response $response Response object
-     */
-    protected function _init(Response $response)
-    {
         $this->_response = $response;
-        $result = $response->getData();
-        $this->_totalHits = isset($result['hits']['total']) ? $result['hits']['total'] : 0;
-        $this->_took = isset($result['took']) ? $result['took'] : 0;
-        if (isset($result['hits']['hits'])) {
-            foreach ($result['hits']['hits'] as $hit) {
-                $this->_results[] = new Result($hit);
-            }
-        }
+        $this->_query = $query;
     }
 
     /**
@@ -90,6 +72,14 @@ class ResultSet implements \Iterator, \Countable
      */
     public function getResults()
     {
+        if (empty($this->_results)){
+            $result = $this->_response->getData();
+            if (isset($result['hits']['hits'])) {
+                foreach ($result['hits']['hits'] as $hit) {
+                    $this->_results[] = new Result($hit);
+                }
+            }
+        }
         return $this->_results;
     }
 
@@ -124,7 +114,9 @@ class ResultSet implements \Iterator, \Countable
      */
     public function getTotalHits()
     {
-        return (int) $this->_totalHits;
+        $result = $this->getResults();
+
+        return isset($result['hits']['total']) ? (int) $result['hits']['total'] : 0;
     }
 
     /**
@@ -134,7 +126,9 @@ class ResultSet implements \Iterator, \Countable
     */
     public function getTotalTime()
     {
-        return (int) $this->_took;
+        $result = $this->getResults();
+
+        return isset($result['took']) ? (int) $result['took'] : 0;
     }
 
     /**
